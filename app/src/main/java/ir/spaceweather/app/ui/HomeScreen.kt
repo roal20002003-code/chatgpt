@@ -50,6 +50,7 @@ fun HomeScreen(vm: HomeViewModel) {
         ) {
             item { DashboardHero(s.hourly, s.charts) }
             item { StatTiles(s.hourly, s.charts) }
+            item { LiveSpaceScene(s.hourly, s.charts) }
             item { Scenes(status) }
             item { ReportCard(s.hourly, s.charts) }
             item { StormCharts(s.charts) }
