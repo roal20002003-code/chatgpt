@@ -48,7 +48,12 @@ fun HomeScreen(vm: HomeViewModel) {
             contentPadding = PaddingValues(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            item { ReferenceDashboard(s.hourly, s.charts) }
+            item { SolarArtwork(s.hourly, s.charts) }
+            item { DashboardHero(s.hourly, s.charts) }
+            item { StatTiles(s.hourly, s.charts) }
+            item { EarthArtwork(s.hourly, s.charts) }
+            item { AuroraArtwork(s.hourly, s.charts) }
+            item { Scenes(status) }
             item { ReportCard(s.hourly, s.charts) }
             item { StormCharts(s.charts) }
             item { ChartsCard(s.charts) }
