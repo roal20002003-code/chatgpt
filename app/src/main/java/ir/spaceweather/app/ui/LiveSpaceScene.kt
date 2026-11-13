@@ -1,6 +1,7 @@
 package ir.spaceweather.app.ui
 
 import androidx.compose.animation.core.*
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,8 +22,8 @@ import ir.spaceweather.app.data.*
 
 private fun sunTier(h: Hourly?, charts: Charts): Int = when (Status.xrayClassOf(h, charts)?.firstOrNull()?.uppercaseChar()) {
     'X' -> 3
-    'M', 'C' -> 2
-    'A', 'B' -> 1
+    'M' -> 2
+    'A', 'B', 'C' -> 1
     else -> 0
 }
 private fun earthTier(h: Hourly?, charts: Charts): Int {
@@ -39,14 +40,17 @@ private fun AnimatedArtwork(kind: String, tier: Int, title: String, detail: Stri
         else -> intArrayOf(R.drawable.space_aurora_1, R.drawable.space_aurora_2, R.drawable.space_aurora_3)
     }
     val transition = rememberInfiniteTransition(label = "space-artwork")
-    val scale by transition.animateFloat(1f, 1.035f, infiniteRepeatable(tween(3600, easing = LinearEasing), RepeatMode.Reverse), label = "breathing")
-    val alpha by transition.animateFloat(.87f, 1f, infiniteRepeatable(tween(2400), RepeatMode.Reverse), label = "glow")
+    val scale by transition.animateFloat(1f, 1.055f, infiniteRepeatable(tween(4500, easing = LinearEasing), RepeatMode.Reverse), label = "breathing")
+    val alpha by transition.animateFloat(.92f, 1f, infiniteRepeatable(tween(2900), RepeatMode.Reverse), label = "glow")
     Column(Modifier.fillMaxWidth().background(C.night, RoundedCornerShape(18.dp))
         .border(1.dp, C.line, RoundedCornerShape(18.dp))) {
-        Image(painterResource(images[(if(tier == 0) 1 else tier).coerceIn(1,3)-1]),
-            contentDescription = title, contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth().height(if(kind == "sun") 205.dp else 155.dp)
-                .graphicsLayer { scaleX = scale; scaleY = scale; this.alpha = alpha })
+        Crossfade(targetState = (if (tier == 0) 1 else tier).coerceIn(1, 3),
+            animationSpec = tween(durationMillis = 1100), label = "solar-tier") { level ->
+            Image(painterResource(images[level - 1]),
+                contentDescription = title, contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().height(if (kind == "sun") 205.dp else 155.dp)
+                    .graphicsLayer { scaleX = scale; scaleY = scale; this.alpha = alpha })
+        }
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween) {
             Text(title, color = C.text, fontWeight = FontWeight.Bold, fontSize = 14.sp)
