@@ -247,7 +247,8 @@ data class Member(val name: String, val role: String, val photo: String)
 val TEAM get() = listOf(
     Member(tr("علی سلطانی", "Ali Soltani"), tr("گزارشگر · منجم آماتور", "Reporter · amateur astronomer"), "http://spaceweather.ir/img/team-ali.webp"),
     Member(tr("عقیل ساری", "Aghil Sari"), tr("طراح وب و توسعه‌دهنده", "Web designer & developer"), "http://spaceweather.ir/img/team-aghil.webp"),
-    Member(tr("مهدی گلدی", "Mahdi Galdi"), tr("اخترفیزیک‌دان و پژوهشگر هواشناسی فضایی · برنامه‌نویس هوش مصنوعی", "Astrophysicist & space weather researcher · AI programmer"), "http://spaceweather.ir/img/team-mahdi.webp"),
+    Member(tr("مهدی گلدی", "Mahdi Galdi"), tr("برنامه‌نویس هوش مصنوعی", "AI Programmer"), "http://spaceweather.ir/img/team-mahdi.webp"),
+    Member(tr("احسان امیری", "Ehsan Amiri"), tr("پژوهشگر", "Researcher"), "http://spaceweather.ir/img/team_ehsan.webp"),
 )
 
 @Composable
@@ -259,7 +260,7 @@ private fun TeamSection() {
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     AsyncImage(
                         model = m.photo, contentDescription = m.name, contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(84.dp).clip(CircleShape).background(C.deep)
+                        modifier = Modifier.size(64.dp).clip(CircleShape).background(C.deep)
                             .border(2.dp, C.sun, CircleShape)
                     )
                     Spacer(Modifier.height(6.dp))
