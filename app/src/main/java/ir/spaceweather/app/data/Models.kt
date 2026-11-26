@@ -42,6 +42,4 @@ data class UiState(
     val alerts: List<Alert> = emptyList(),
     val charts: Charts = Charts(emptyMap()),
     val errors: List<String> = emptyList(),
-    val flare: LatestFlare? = null,
-    val flareError: Boolean = false,
 )
