@@ -143,6 +143,7 @@ object Monitor {
             probe("monitoring", Api.MONITOR),
             probe("alerts", Api.ALERTS),
             probe("charts", Api.CHARTS),
+            probe("lastflare", Api.LAST_FLARE),
         )
         return build(Tm.now(), eps)
     }

@@ -18,6 +18,16 @@ object Api {
     /** دریافت پیام کاربران (AppMessage.ashx) */
     const val MESSAGE = "$BASE/AppMessage.ashx"
 
+    const val LAST_FLARE = "$BASE/lastflare.aspx"
+
+    suspend fun latestFlare(): LatestFlare {
+        val o = JSONArray(cleanJson(get(LAST_FLARE))).getJSONObject(0)
+        return LatestFlare(o.getLong("flare_no"), o.getInt("count").coerceAtLeast(0),
+            o.getString("miladi"), o.getString("shamsi"), o.getString("class"),
+            o.getString("spot"), o.getString("lat"), o.getString("lot"),
+            o.getString("start"), o.getString("peak"), o.getString("endd"))
+    }
+
     val CHART_KEYS = listOf("sfu", "xray", "wind", "bt", "bz", "dens", "kp", "dst", "elec", "proton", "temp")
 
     // ---------- HTTP ----------

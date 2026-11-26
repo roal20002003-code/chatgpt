@@ -34,6 +34,8 @@ class HomeViewModel : ViewModel() {
             val h = async { runCatching { Api.hourly() } }
             val a = async { runCatching { Api.alerts() } }
             val c = async { runCatching { Api.charts() } }
+            val f = async { runCatching { Api.latestFlare() } }
+            val fr = f.await()
             val hr = h.await(); val ar = a.await(); val cr = c.await()
             if (hr.isFailure) errors += tr("پارامترهای لحظه‌ای: ${hr.exceptionOrNull()?.message}", "Live parameters: ${hr.exceptionOrNull()?.message}")
             if (ar.isFailure) errors += tr("اخطارها: ${ar.exceptionOrNull()?.message}", "Alerts: ${ar.exceptionOrNull()?.message}")
@@ -45,6 +47,8 @@ class HomeViewModel : ViewModel() {
                     alerts = ar.getOrNull() ?: s.alerts,
                     charts = cr.getOrNull() ?: s.charts,
                     errors = errors,
+                    flare = fr.getOrNull() ?: s.flare,
+                    flareError = fr.isFailure,
                 )
             }
         }
