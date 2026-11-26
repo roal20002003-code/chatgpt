@@ -11,12 +11,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import ir.spaceweather.app.data.L
 import ir.spaceweather.app.data.Prefs
 import ir.spaceweather.app.ui.AppRoot
 import ir.spaceweather.app.ui.LaunchLoading
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CancellationException
+import ir.spaceweather.app.ui.preloadStartupImages
 import android.os.SystemClock
 import ir.spaceweather.app.ui.SpaceTheme
 
@@ -33,18 +35,29 @@ class MainActivity : ComponentActivity() {
             val state by vm.state.collectAsStateWithLifecycle()
             var showLaunch by remember { mutableStateOf(true) }
             var progress by remember { mutableStateOf(0f) }
-            val isLoading by rememberUpdatedState(state.loading)
+            var imagesReady by remember { mutableStateOf(false) }
+            val ready by rememberUpdatedState(!state.loading && imagesReady)
+            // Kept outside the splash branch so unfinished image downloads continue after entry.
             LaunchedEffect(Unit) {
+                try {
+                    preloadStartupImages(this@MainActivity, vm.state)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // A failed preload must never prevent entry.
+                } finally {
+                    imagesReady = true
+                }
+            }
+            LaunchedEffect(Unit) {
+                val timer = StartupProgress()
+                withFrameNanos { } // first frame at 0%
                 val start = SystemClock.elapsedRealtime()
-                // No minimum wait. Exit immediately on first completed main-data refresh,
-                // or after 8 seconds even if the network is slow.
                 while (showLaunch) {
+                    withFrameNanos { }
                     val elapsed = SystemClock.elapsedRealtime() - start
-                    progress = (elapsed / 8000f).coerceIn(0f, .95f)
-                    if (!isLoading && elapsed >= 150L || elapsed >= 8000L) {
-                        progress = 1f
-                        showLaunch = false
-                    } else delay(50)
+                    progress = timer.advance(elapsed, ready)
+                    if (timer.canDismiss(elapsed)) showLaunch = false
                 }
             }
             SpaceTheme(rtl = !en) {

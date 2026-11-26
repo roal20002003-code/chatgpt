@@ -18,6 +18,43 @@ object Api {
     /** دریافت پیام کاربران (AppMessage.ashx) */
     const val MESSAGE = "$BASE/AppMessage.ashx"
 
+    const val LAST_FLARE = "$BASE/lastflare.aspx"
+
+    suspend fun latestFlare(): LatestFlare {
+        val raw = get(LAST_FLARE).trim().removePrefix("\uFEFF").trim()
+        fun findRecord(value: Any?, depth: Int = 0): JSONObject? {
+            if (depth > 8) return null
+            return when (value) {
+                is JSONObject -> {
+                    val normalized = JSONObject()
+                    val keys = value.keys()
+                    while (keys.hasNext()) {
+                        val key = keys.next()
+                        normalized.put(key.trim().lowercase(java.util.Locale.ROOT), value.opt(key))
+                    }
+                    if (normalized.optString("flare_no").toLongOrNull()?.let { it > 0 } == true) normalized
+                    else {
+                        val iterator = value.keys()
+                        var found: JSONObject? = null
+                        while (iterator.hasNext() && found == null) found = findRecord(value.opt(iterator.next()), depth + 1)
+                        found
+                    }
+                }
+                is JSONArray -> (0 until value.length()).firstNotNullOfOrNull { findRecord(value.opt(it), depth + 1) }
+                is String -> runCatching { findRecord(org.json.JSONTokener(cleanJson(value)).nextValue(), depth + 1) }.getOrNull()
+                else -> null
+            }
+        }
+        val root = runCatching { org.json.JSONTokener(raw).nextValue() }.getOrElse {
+            org.json.JSONTokener(cleanJson(raw)).nextValue()
+        }
+        val o = findRecord(root) ?: throw IOException("lastflare.aspx: flare_no not found; response: " + raw.take(250))
+        return LatestFlare(o.getLong("flare_no"), o.optInt("count", 0).coerceAtLeast(0),
+            o.optString("miladi", "—"), o.optString("shamsi", "—"), o.optString("class", "—"),
+            o.optString("spot", "—"), o.optString("lat", "—"), o.optString("lot", "—"),
+            o.optString("start", "—"), o.optString("peak", "—"), o.optString("endd", "—"))
+    }
+
     val CHART_KEYS = listOf("sfu", "xray", "wind", "bt", "bz", "dens", "kp", "dst", "elec", "proton", "temp")
 
     // ---------- HTTP ----------
