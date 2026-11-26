@@ -57,9 +57,9 @@ fun HomeScreen(vm: HomeViewModel) {
             item { ReportCard(s.hourly, s.charts) }
             item { StormCharts(s.charts) }
             item { ChartsCard(s.charts) }
-            item { LatestFlareCard(s.flare, s.flareError) }
+            item(key = "latest_flare") { LatestFlareCard(s.flare, s.flareError) }
             item { SunImages() }
-            item { HistoricalFlares() }
+            item(key = "historical_flares") { HistoricalFlares() }
             item { EnlilPlayer() }
             item { TeamSection() }
             if (s.errors.isNotEmpty()) item {
