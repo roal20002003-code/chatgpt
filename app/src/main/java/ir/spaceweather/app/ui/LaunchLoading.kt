@@ -31,68 +31,41 @@ import ir.spaceweather.app.data.tr
 import kotlin.math.PI
 import kotlin.math.sin
 
-/** Local cinematic art, animated plasma highlights, and a real runtime progress indicator. */
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import android.graphics.BitmapFactory
+
+/** Local storyboard flight, synchronized to the fixed eight-second startup clock. */
 @Composable
 fun LaunchLoading(progress: Float) {
     val p = progress.coerceIn(0f, 1f)
-    val transition = rememberInfiniteTransition(label = "solar-storm")
-    val phase by transition.animateFloat(
-        initialValue = 0f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(2100, easing = LinearEasing)), label = "plasma"
-    )
+    val context = LocalContext.current
+    val frames = remember(context) {
+        listOf(R.drawable.startup_flight_00, R.drawable.startup_flight_01, R.drawable.startup_flight_02, R.drawable.startup_flight_03, R.drawable.startup_flight_04, R.drawable.startup_flight_05, R.drawable.startup_flight_06, R.drawable.startup_flight_07, R.drawable.startup_flight_08, R.drawable.startup_flight_09, R.drawable.startup_flight_10, R.drawable.startup_flight_11, R.drawable.startup_flight_12, R.drawable.startup_flight_13, R.drawable.startup_flight_14, R.drawable.startup_flight_15).map { BitmapFactory.decodeResource(context.resources, it).asImageBitmap() }
+    }
+    val position = p * (frames.size - 1)
+    val index = position.toInt().coerceIn(0, frames.lastIndex)
+    val next = (index + 1).coerceAtMost(frames.lastIndex)
+    val blend = position - index
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Box(Modifier.fillMaxSize().background(Color(0xFF030817)).statusBarsPadding().navigationBarsPadding()) {
-            BoxWithConstraints(Modifier.fillMaxSize()) {
-                Image(
-                    painter = painterResource(R.drawable.startup_cinematic),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = Modifier.fillMaxSize()
-                )
-                // Animated highlights follow the existing plasma stream; the underlying art is local.
-                Canvas(Modifier.fillMaxSize()) {
-                    val impact = Offset(size.width * .718f, size.height * .355f)
-                    val pulse = (.5f + .5f * sin(phase * 2f * PI).toFloat())
-                    val radius = size.width * .10f
-                    drawCircle(Brush.radialGradient(listOf(Color(0xFF9DEBFF).copy(alpha = .19f + .13f * pulse), Color.Transparent), center = impact, radius = radius), radius, impact)
-                    val aurora = Offset(size.width * .89f, size.height * .263f)
-                    val auroraRadius = size.width * .16f
-                    drawCircle(Brush.radialGradient(listOf(Color(0xFF28FFAB).copy(alpha = .06f + .12f * pulse), Color.Transparent), center = aurora, radius = auroraRadius), auroraRadius, aurora)
-                    for (i in 0 until 17) {
-                        val t = (phase + i / 17f) % 1f
-                        val x = size.width * (.245f + .47f * t)
-                        val y = size.height * (.285f + .070f * t + .012f * sin(t * 11f + i).toFloat())
-                        val center = Offset(x, y)
-                        val alpha = (.3f + .5f * sin(t * PI).toFloat()).coerceIn(0f, 1f)
-                        val r = (1.1f + (i % 3) * .55f).dp.toPx()
-                        drawCircle(Color(0xFFFFA12D).copy(alpha = alpha * .24f), r * 3f, center)
-                        drawCircle(Color(0xFFFFE8A8).copy(alpha = alpha), r, center)
-                    }
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                    Image(frames[index], null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                    if (next != index) Image(frames[next], null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit, alpha = blend)
+                    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent, Color(0xFF030817).copy(alpha = .55f)))))
                 }
-                val compact = maxHeight < 530.dp
-                val subtitleSize = if (compact) 12.sp else 16.sp
-                Text(
-                    tr("مرکز رصد فعالیت‌های خورشیدی", "Solar Activity Observation Center"),
-                    color = Color(0xFFF2F6FF), fontSize = subtitleSize,
-                    fontWeight = FontWeight.Medium, textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.TopCenter).offset(y = maxHeight * .646f).fillMaxWidth().padding(horizontal = 18.dp)
-                )
-                Row(
-                    Modifier.align(Alignment.TopCenter).offset(y = maxHeight * .729f).fillMaxWidth(.85f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    NeonProgress(p, Modifier.weight(1f).height(if (compact) 18.dp else 25.dp))
-                    Text("${(p * 100).toInt()}%", color = Color.White, fontSize = if (compact) 17.sp else 23.sp,
-                        fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.width(if (compact) 48.dp else 62.dp))
+                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                    Text("SPACEWEATHER", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.Black)
+                    Text(".IR", color = Color(0xFFFFB23F), fontSize = 27.sp, fontWeight = FontWeight.Black)
                 }
-                Text(
-                    if (p >= 1f) tr("در حال ورود به برنامه…", "Opening SpaceWeather…")
-                    else tr("در حال دریافت اطلاعات و آماده‌سازی برنامه…", "Receiving data and preparing the app…"),
-                    color = Color(0xFFB1DFFF), fontSize = if (compact) 10.sp else 13.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.TopCenter).offset(y = maxHeight * .793f).fillMaxWidth().padding(horizontal = 12.dp)
-                )
+                Text(tr("مرکز رصد فعالیت‌های خورشیدی", "Solar Activity Observation Center"), color = Color(0xFFE2EDFF), fontSize = 15.sp, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(28.dp))
+                NeonProgress(p, Modifier.fillMaxWidth(.84f).height(24.dp))
+                Text("${(p * 100).toInt()}%", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(12.dp))
+                Text(if (p >= 1f) tr("در حال ورود به برنامه…", "Opening SpaceWeather…") else tr("در حال دریافت اطلاعات هواشناسی فضایی…", "Receiving space weather data…"), color = Color(0xFFB1DFFF), fontSize = 13.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 12.dp))
+                Spacer(Modifier.height(40.dp))
             }
         }
     }
