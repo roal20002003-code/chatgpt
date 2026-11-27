@@ -49,12 +49,9 @@ fun LaunchLoading(progress: Float) {
     val blend = position - index
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Box(Modifier.fillMaxSize().background(Color(0xFF030817)).statusBarsPadding().navigationBarsPadding()) {
-            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                    Image(frames[index], null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
-                    if (next != index) Image(frames[next], null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit, alpha = blend)
-                    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent, Color(0xFF030817).copy(alpha = .55f)))))
-                }
+            Image(frames[index], null, Modifier.fillMaxSize(), contentScale = ContentScale.FillBounds)
+            if (next != index) Image(frames[next], null, Modifier.fillMaxSize(), contentScale = ContentScale.FillBounds, alpha = blend)
+            Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     Text("SPACEWEATHER", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.Black)
                     Text(".IR", color = Color(0xFFFFB23F), fontSize = 27.sp, fontWeight = FontWeight.Black)

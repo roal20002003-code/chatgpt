@@ -12,9 +12,9 @@ android {
         applicationId = "ir.spaceweather.app"
         minSdk = 26
         targetSdk = 35
-        // هر بار نسخه را بالا ببرید: versionName = "1.0.12" و versionCode = 112
-        versionCode = 112
-        versionName = "1.0.12"
+        // هر بار نسخه را بالا ببرید: versionName = "1.0.13" و versionCode = 113
+        versionCode = 113
+        versionName = "1.0.13"
     }
 
     // امضای ثابت برای همهٔ نسخه‌ها (از GitHub Secrets) — بدون آن بروزرسانی روی نسخهٔ قبلی نصب نمی‌شود
